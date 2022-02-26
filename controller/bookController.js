@@ -17,7 +17,7 @@ async function bookDetail (ctx, next) {
         return ctx.body = { code: -1, message: '缺少必要参数' }
     }
 
-    const { bookInfo } = await bookService.bookDetail(ctx, next)
+    const bookInfo = await bookService.bookDetail(ctx, next)
 
     ctx.body = {
         code: 0,
@@ -46,7 +46,7 @@ async function swiperList (ctx, next) {
             '我想和你互相浪费，一起虚度短的沉默，长的无意义，一起消磨精致而苍老的宇宙。——李元胜',
             '你瞧这些白云聚了又散，散了又聚，人生离合，亦复如斯。——金庸',
             '月光下，你带着笑地向我步来，月色与雪色之间，你是第三种绝色。——余光中'
-        ],
+        ]
     } 
 }
 

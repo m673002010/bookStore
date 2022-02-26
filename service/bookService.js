@@ -1,4 +1,5 @@
 const bookCollection = require('../db/book')
+const doubanService = require('./doubanService')
 
 async function addBook(param) {
   try {
@@ -27,9 +28,14 @@ async function bookList(ctx, next) {
 async function bookDetail(ctx, next) {
   try {
     const { bookId } = ctx.request.query
-    const bookInfo = await bookCollection.findOne({ bookId: +bookId })
+    let bookInfo = await bookCollection.findOne({ bookId: +bookId })
 
-    return { bookInfo }
+    // 数据库如果没有对应的数据，则请求豆瓣获取
+    if (!bookInfo) {
+      bookInfo = await doubanService.getBookInfoById(ctx, next)
+    }
+
+    return bookInfo ? bookInfo : {}
   } catch (e) {
       console.log('bookDetail异常', e.message)
       return { code: 0, message: '获取图书详情失败' }
