@@ -10,6 +10,8 @@ async function start () {
         // 连接redis
         global.redisClient = await require('./db/redis').connectRedis()
 
+        global.logger = require('./lib/logger')
+
         // 启动定时任务
         require('./cron').start()
 
@@ -21,8 +23,12 @@ async function start () {
         const koaBody = require('koa-body')
         const rq = require('./lib/req')
         const { checkLogin } = require('./middleware/checkLogin')
+        const { ctxLog } = require('./middleware/log')
 
         const app = new Koa()
+
+        app.use(ctxLog)
+
         app.use(koaBody({
             multipart: true,
             formidable: {
@@ -47,10 +53,10 @@ async function start () {
         app.use(router.routes())
 
         app.listen(config.port)
-        console.log('server start success...')
+        logger.log('server start success...')
     } catch (err) {
         // 导致进程退出的错误
-        console.log('process exit err:', err)
+        logger.log('process exit err:', 'error')
         process.exit(1)
     }
 }

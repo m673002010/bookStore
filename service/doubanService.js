@@ -31,12 +31,10 @@ async function getBookInfoById(ctx, next) {
 
         // 正则提取定价和页数
         const info = $('#info').html()
-        const price = info.match(/定价:<\/span>(.*?)<br>/)
+        const price = info.match(/定价:<\/span>(.*?)[元]{0,1}<br>/)
         const pageTotal = info.match(/页数:<\/span>(.*?)<br>/)
-        bookInfo.price = price ? +price[1] : 0
+        bookInfo.price = price ? (+price[1]).toFixed(2) : 0
         bookInfo.pageTotal = pageTotal ? +pageTotal[1] : 0
-
-        console.log(bookInfo)
 
         return bookInfo
     } catch (e) {
