@@ -7,6 +7,7 @@ async function ctxLog(ctx, next) {
     const reqParam = JSON.stringify(Object.assign(ctx.request.query, ctx.request.body) || {}) 
     const res = JSON.stringify(ctx.body || {}) 
 
+    // 日志的记录格式
     const logStr = `${ip} ${method} ${url} ${reqParam} ${res}`
 
     logger.log(logStr)

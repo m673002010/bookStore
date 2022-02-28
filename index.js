@@ -4,54 +4,42 @@ start()
 
 async function start () {
     try {
-        // 连接mongodb
         global.mongoDb = await require('./db').connectDb()
-
-        // 连接redis
         global.redisClient = await require('./db/redis').connectRedis()
-
         global.logger = require('./lib/logger')
 
         // 启动定时任务
         require('./cron').start()
 
-        // 引入中间件
+        // 引入、挂载中间件
         const Koa = require('koa')
         const KoaStatic = require('koa-static')
         const router = require('./router.js')
-        // const bodyParser = require('koa-bodyparser')
         const koaBody = require('koa-body')
         const rq = require('./lib/req')
         const { checkLogin } = require('./middleware/checkLogin')
         const { ctxLog } = require('./middleware/log')
+        const { requestId } = require('./middleware/requestId')
 
         const app = new Koa()
 
         app.use(ctxLog)
-
+        app.use(requestId)
         app.use(koaBody({
             multipart: true,
             formidable: {
                 maxFileSize: 500*1024*1024    // 设置上传文件大小最大限制，默认5M
             }
         }))
-
-        // 获取静态资源
         app.use(KoaStatic(path.join(__dirname, './static/')))
-
-        // 校验登录
         app.use(checkLogin)
-
-        // 引入请求组件
         app.use(async (ctx, next) => {
             ctx.rq = rq
             await next()
         })
-
-        // app.use(bodyParser())
-
         app.use(router.routes())
 
+        // 启动服务监听端口
         app.listen(config.port)
         logger.log('server start success...')
     } catch (err) {
