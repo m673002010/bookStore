@@ -1,12 +1,20 @@
-global.config = require('./config')
 const path = require('path')
 start()
 
 async function start () {
     try {
+        global.config = require('./config')
         global.mongoDb = await require('./db').connectDb()
         global.redisClient = await require('./db/redis').connectRedis()
         global.logger = require('./lib/logger')
+        global.broker = await require('./lib/messageBroker').getInstance({
+            vhost: 'bookStore',
+            exchange: 'log_exchange',
+            exType: 'topic',
+            routeKey: 'bookStore.log'
+        })
+
+        await broker.send('hello logCenter ...')
 
         // 启动定时任务
         require('./cron').start()
@@ -44,7 +52,7 @@ async function start () {
         logger.log('server start success...')
     } catch (err) {
         // 导致进程退出的错误
-        logger.log('process exit err:', 'error')
+        logger.log('process exit err:', err)
         process.exit(1)
     }
 }
