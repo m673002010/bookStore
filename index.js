@@ -4,17 +4,23 @@ start()
 async function start () {
     try {
         global.config = require('./config')
+
+        // 连接mongo
         global.mongoDb = await require('./db').connectDb()
+
+        // 连接redis
         global.redisClient = await require('./db/redis').connectRedis()
+
+        // 日志
         global.logger = require('./lib/logger')
+
+        // 连接rabbitmq
         global.broker = await require('./lib/messageBroker').getInstance({
             vhost: 'bookStore',
             exchange: 'log_exchange',
             exType: 'topic',
             routeKey: 'bookStore.log'
         })
-
-        await broker.send('hello logCenter ...')
 
         // 启动定时任务
         require('./cron').start()
@@ -52,7 +58,7 @@ async function start () {
         logger.log('server start success...')
     } catch (err) {
         // 导致进程退出的错误
-        logger.log('process exit err:', err)
+        logger.log('process exit err:' + err.message)
         process.exit(1)
     }
 }

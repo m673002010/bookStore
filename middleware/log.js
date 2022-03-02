@@ -11,6 +11,9 @@ async function ctxLog(ctx, next) {
     const logStr = `${ip} ${method} ${url} ${reqParam} ${res}`
 
     logger.log(logStr)
+
+    // 将请求记录推送到logCenter
+    broker.send({ ip, method, url, reqParam, res })
 }
 
 module.exports = {
