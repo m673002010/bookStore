@@ -5,14 +5,14 @@ async function start () {
     try {
         global.config = require('./config')
 
+        // 日志
+        global.logger = require('./lib/logger')
+
         // 连接mongo
         global.mongoDb = await require('./db').connectDb()
 
         // 连接redis
         global.redisClient = await require('./db/redis').connectRedis()
-
-        // 日志
-        global.logger = require('./lib/logger')
 
         // 连接rabbitmq
         global.broker = await require('./lib/messageBroker').getInstance({
@@ -58,7 +58,7 @@ async function start () {
         logger.log('server start success...')
     } catch (err) {
         // 导致进程退出的错误
-        logger.log('process exit err:' + err.message)
+        logger.log('process exit err:' + err.message, 'error')
         process.exit(1)
     }
 }
