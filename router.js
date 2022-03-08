@@ -8,6 +8,8 @@ router.post('/login', loginController.login)
 // 用户
 const userController = require('./controller/userController')
 router.post('/user/collectBook', userController.collectBook)
+router.get('/user/collectedBooks', userController.collectedBooks)
+router.get('/user/cancelCollected', userController.cancelCollected)
 
 // 搜索
 const searchController = require('./controller/searchController')

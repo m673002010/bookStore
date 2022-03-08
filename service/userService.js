@@ -37,7 +37,6 @@ async function collectBook (param) {
       }
     )
 
-    console.log(param.isCollected)
     // 关联用户和书籍
     const res = await userBookCollection.updateOne(
       {
@@ -53,7 +52,6 @@ async function collectBook (param) {
       }
     )
 
-    console.log('======res======', res)
     return true
   } catch (e) {
       console.log('收藏/取消收藏图书异常', e.message)
@@ -61,7 +59,39 @@ async function collectBook (param) {
   }
 }
 
+async function collectedBooks(param) {
+  try {
+    const collectedArr = await userBookCollection.find({ openid: param.openid, isCollected: true }).toArray()
+
+    if (!collectedArr || collectedArr.length === 0) return []
+  
+    const bookIds = collectedArr.map(item => item.bookId)
+  
+    const books = await bookCollection.find({ bookId: { $in: bookIds } }).toArray()
+  
+    return books ? books : []
+  } catch (e) {
+    console.log('获取收藏图书失败', e.message)
+    return []
+  }
+}
+
+async function cancelCollected(param) {
+  try {
+    const res = await userBookCollection.deleteOne({ openid: param.openid, bookId: +param.bookId })
+
+    console.log(res)
+
+    return true
+  } catch(e) {
+    console.log('取消收藏图书失败', e.message)
+    return false
+  }
+}
+
 module.exports = {
   addUser,
-  collectBook
+  collectBook,
+  collectedBooks,
+  cancelCollected
 }
