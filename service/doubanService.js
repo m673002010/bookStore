@@ -15,7 +15,7 @@ async function getBookInfoById(ctx, next) {
 
         const $ = cheerio.load(res)
 
-        const bookInfo = {}
+        const bookInfo = { bookId }
 
         // 从meta提取图书信息
         bookInfo.name = $('meta[property="og:title"]').attr('content')
@@ -33,8 +33,13 @@ async function getBookInfoById(ctx, next) {
         const info = $('#info').html()
         const price = info.match(/定价:<\/span>(.*?)[元]{0,1}<br>/)
         const pageTotal = info.match(/页数:<\/span>(.*?)<br>/)
+
         bookInfo.price = price ? (+price[1]).toFixed(2) : 0
         bookInfo.pageTotal = pageTotal ? +pageTotal[1] : 0
+
+        // 图书简介
+        const intro = $('.intro', '.hidden').html() || $('.intro').html()
+        bookInfo.introduction = intro
 
         return bookInfo
     } catch (e) {

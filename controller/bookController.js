@@ -17,12 +17,12 @@ async function bookDetail (ctx, next) {
         return ctx.body = { code: -1, message: '缺少必要参数' }
     }
 
-    const bookInfo = await bookService.bookDetail(ctx, next)
+    const data = await bookService.bookDetail(ctx, next)
 
     ctx.body = {
         code: 0,
         message: '获取图书详情成功',
-        data: bookInfo
+        data
     }
 }
 

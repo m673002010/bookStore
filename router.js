@@ -5,6 +5,10 @@ const router = new koaRouter()
 const loginController = require('./controller/loginController')
 router.post('/login', loginController.login)
 
+// 用户
+const userController = require('./controller/userController')
+router.post('/user/collectBook', userController.collectBook)
+
 // 搜索
 const searchController = require('./controller/searchController')
 router.get('/search', searchController.search)
