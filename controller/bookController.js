@@ -1,23 +1,24 @@
 const bookService = require('../service/bookService')
 
 async function bookList (ctx, next) {
-    const books = await bookService.bookList(ctx, next)
+    const res = await bookService.bookList(ctx.request.query)
 
     ctx.body = {
         code: 0,
         message: '获取图书列表成功',
-        data: books
+        data: res
     }
 }
 
 async function bookDetail (ctx, next) {
-    const param = ctx.request.query
+    const { bookId } = ctx.request.query
+    const { openid } = ctx.userInfo ? ctx.userInfo : {}
 
-    if (!param.bookId) {
+    if (!bookId) {
         return ctx.body = { code: -1, message: '缺少必要参数' }
     }
 
-    const data = await bookService.bookDetail(ctx, next)
+    const data = await bookService.bookDetail({ bookId, openid })
 
     ctx.body = {
         code: 0,

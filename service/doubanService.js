@@ -1,11 +1,10 @@
 const cheerio = require('cheerio')
+const rq = require('../lib/req')
 
-async function getBookInfoById(ctx, next) {
+async function getBookInfoById(bookId) {
     try {
-        const { bookId } = ctx.request.query
-
         // 豆瓣的图书详情
-        const res = await ctx.rq.get({
+        const res = await rq.get({
             url: 'https://book.douban.com/subject/' + bookId,
             params: {},
             headers: {
@@ -48,6 +47,50 @@ async function getBookInfoById(ctx, next) {
     }
 }
 
+async function getBookListByCate({ cateName, start }) {
+    try {
+        // 豆瓣的图书详情
+        const res = await rq.get({
+            url: encodeURI('https://book.douban.com/tag/' + cateName), // 路径出现中文，encode
+            params: {
+                start
+            },
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
+            }
+        }).catch(err => console.log('err message:', err.message))
+
+        const $ = cheerio.load(res)
+
+        const bookList = []
+        $('.subject-item').each((i, elem) => {
+            const book = {}
+
+            // 图片
+            book.imageSrc = $('img', elem).attr('src')
+
+            // id、名字、链接
+            const info = $('.info', elem)
+            book.name = $('a', info).attr('title')
+            book.url = $('a', info).attr('href')
+            book.id = +(book.url.match(/subject\/(\d+)/)[1] || '')
+
+            // 出版信息
+            book.pub = $('.pub', elem).text()
+            book.author = book.pub.split('/')[0].replace(/[^\u4e00-\u9fa5a-zA-Z0-9\[\]]/g, "")
+            book.publishDate = book.pub.match(/([0-9-]+)/) && book.pub.match(/([0-9-]+)/)[0]
+
+            bookList.push(book)
+        })
+
+        return bookList
+    } catch (e) {
+        console.log('getBookListByCate异常', e.message)
+        return null
+    }
+}
+
 module.exports = {
-    getBookInfoById
+    getBookInfoById,
+    getBookListByCate
 }
